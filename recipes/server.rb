@@ -28,9 +28,11 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 if platform_family?('debian') then
-  dependencies = [ 'zip', 'python2.7', 'python-pil', 'python-matplotlib',
+  dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
                    'python-numpy', 'python-tables', 'python-scipy',
                    'zero-ice', 'postgresql', 'nginx', 'mencoder' ]
+  use_pil_package = platform?('ubuntu') and 
+    ( node['platform_version'] <=> '14.04') >= 0
 else
   raise 'Platform not supported ...'
 end
@@ -41,8 +43,24 @@ dependencies.each() do |pkg|
   package pkg
 end
 
-directory "/opt/omero" do
+if use_pil_package then
+  package 'python_pil' do
   end
+else 
+  # If we can't install 'pil' from the package manager, build from source.
+  include_recipe 'python::default'
+  pip_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
+                    'zlib1g-dev']
+  pip_build_deps.each() do |pkg|
+    package pkg do
+    end
+  end
+  python_pip 'pil' do
+  end
+end
+
+directory "/opt/omero" do
+end
 
 version = '5.0.1'
 build = 'OMERO.server-5.0.1-ice35-b21'
