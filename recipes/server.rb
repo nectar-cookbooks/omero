@@ -97,6 +97,6 @@ user 'omero' do
   home '/var/omero'
   system true
   shell '/bin/false'
-  supports { :manage_home => true }
+  supports :manage_home => true
 end
 
