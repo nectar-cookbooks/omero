@@ -111,6 +111,7 @@ end
 
 bash 'omero-configuration' do
   cwd '/opt/omero/OMERO.server'
+  user 'omero'
   code <<-EOH
   bin/omero config set omero.db.name omero_database
   bin/omero config set omero.db.user db_user
@@ -121,6 +122,7 @@ end
   
 bash 'init-omero-db' do
   cwd '/opt/omero/OMERO.server'
+  user 'omero'
   code <<-EOH
   bin/omero db script << EOF
   
