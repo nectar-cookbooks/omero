@@ -75,7 +75,7 @@ end
 bash "unpack" do
   code "unzip #{build}.zip"
   cwd "/opt/omero"
-  not_if do ::File.exists("/opt/omero/#{build}") end
+  not_if do ::File.exists?("/opt/omero/#{build}") end
 end
 
 link "/opt/omero/OMERO.server" do
