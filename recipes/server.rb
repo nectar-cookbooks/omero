@@ -88,7 +88,11 @@ bash 'init-omero-database' do
   code <<-EOH
   psql -d postgres -c "create user db_user with password 'db_password';"
   createdb -O db_user omero_database
-  createlang plpgsql omero_database
+  # createlang plpgsql omero_database
+  EOH
+  not_if <<-EOH
+  export PGPASSWORD=db_password
+  psql -h localhost -U db_user -l | grep -l omero_database
   EOH
 end
 
