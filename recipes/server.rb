@@ -83,7 +83,7 @@ link "/opt/omero/OMERO.server" do
   link_type :symbolic
 end
 
-bash 'init-omero-database' do
+bash 'init-postgres-database' do
   user 'postgres'
   code <<-EOH
   psql -d postgres -c "create user db_user with password 'db_password';"
@@ -104,3 +104,30 @@ user 'omero' do
   supports :manage_home => true
 end
 
+directory '/var/omero/data' do
+  user 'omero'
+  mode 0750
+end
+
+bash 'omero-configuration' do
+  cwd '/opt/omero/OMERO.server'
+  code <<-EOH
+  bin/omero config set omero.db.name omero_database
+  bin/omero config set omero.db.user db_user
+  bin/omero config set omero.db.pass db_password
+  bin/omero config set omero.data.dir /var/omero/data
+  EOH
+end
+  
+bash 'init-omero-db' do
+  cwd '/opt/omero/OMERO.server'
+  code <<-EOH
+  bin/omero db script << EOF
+  
+  
+  omero_root_password
+  omero_root_password
+  EOF
+  EOH
+end
+  
