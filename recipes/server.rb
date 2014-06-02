@@ -44,7 +44,7 @@ dependencies.each() do |pkg|
 end
 
 if use_pil_package then
-  package 'python_pil' do
+  package 'python-pil' do
   end
 else 
   # If we can't install 'pil' from the package manager, build from source.
