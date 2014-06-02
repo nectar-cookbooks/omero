@@ -67,6 +67,7 @@ build = 'OMERO.server-5.0.1-ice35-b21'
 
 remote_file "/opt/omero/#{build}.zip" do
   source "http://downloads.openmicroscopy.org/omero/#{version}/artifacts/#{build}.zip"
+  action :create_if_missing
 end
 
 bash "unpack" do
