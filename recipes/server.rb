@@ -82,3 +82,21 @@ link "/opt/omero/OMERO.server" do
   to "/opt/omero/#{build}"
   link_type :symbolic
 end
+
+bash 'init-omero-database' do
+  user 'postgres'
+  code <<-EOH
+  psql -d postgres -c "create user db_user with password 'db_password';"
+  createdb -O db_user omero_database
+  createlang plpgsql omero_database
+  EOH
+end
+
+user 'omero' do
+  comment 'Omero service user'
+  home '/var/omero'
+  system true
+  shell '/bin/false'
+  supports { :manage_home => true }
+end
+
