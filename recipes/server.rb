@@ -135,11 +135,11 @@ bash 'init-omero-db' do
   user 'omero'
   code <<-EOH
   bin/omero db script << EOF
-  
-  
-  omero_root_password
-  omero_root_password
-  EOF
+
+
+omero_root_password
+omero_root_password
+EOF
   EOH
 end
   
