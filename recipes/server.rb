@@ -61,7 +61,16 @@ else
   end
 end
 
+user 'omero' do
+  comment 'Omero service user'
+  home '/var/omero'
+  system true
+  shell '/bin/false'
+  supports :manage_home => true
+end
+
 directory "/opt/omero" do
+  owner 'omero'
 end
 
 version = '5.0.1'
@@ -75,6 +84,7 @@ end
 bash "unpack" do
   code "unzip #{build}.zip"
   cwd "/opt/omero"
+  user 'omero'
   not_if do ::File.exists?("/opt/omero/#{build}") end
 end
 
