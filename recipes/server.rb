@@ -37,7 +37,9 @@ else
   raise 'Platform not supported ...'
 end
 
-include_recipe 'java'
+include_recipe 'postgres::default'
+
+include_recipe 'java::default'
 
 dependencies.each() do |pkg| 
   package pkg
