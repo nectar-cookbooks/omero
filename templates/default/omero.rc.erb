@@ -1,0 +1,36 @@
+#!/bin/bash
+# omero         Start/stop script for omero.
+#               Harri Jäälinoja <harri.jaalinoja@helsinki.fi> Oct. 2011. Rev: 20111007
+#
+# chkconfig:    345 97 5
+# description:  OMERO server
+  
+OMERO_USER=<%= @OMERO_USER %>
+OMERO_HOME=<%= @OMERO_HOME %>
+  
+. /etc/init.d/functions
+RETVAL=0
+  
+case "$1" in
+  start|restart )
+    [ "$1" = start ] && _P=start || _P=restart
+  
+    # start (or restart) OMERO server
+    runuser -s /bin/bash - $OMERO_USER -c \
+      "ulimit -c 81920; $OMERO_HOME/bin/omero admin $_P"
+  
+    RETVAL=$?; echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
+    exit $RETVAL ;;
+  
+  stop )
+    runuser -s /bin/bash - $OMERO_USER -c "$Env $OMERO_HOME/bin/omero admin stop"
+    RETVAL=$?; echo; [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/`basename $0`
+    exit $RETVAL ;;
+  status )
+    runuser -s /bin/bash - $OMERO_USER -c "$Env $OMERO_HOME/bin/omero admin status"
+    RETVAL=$?; echo
+    exit $RETVAL ;;
+  * )
+    echo "Usage: $0 {start|stop|status|restart}"
+    exit 2 ;;
+esac
