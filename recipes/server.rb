@@ -129,13 +129,15 @@ bash 'omero-configuration' do
   bin/omero config set omero.data.dir /var/omero/data
   EOH
 end
-  
+
+# 
 bash 'init-omero-db' do
   cwd '/opt/omero/OMERO.server'
   user 'omero'
   code <<-EOH
   export HOME=/tmp
   bin/omero db script "" "" omero_root_password
+  export PGPASSWORD=db_password
   psql -h localhost -U db_user omero_database < OMERO5.0__0.sql
   EOH
   not_if do ::File.exists?('/opt/omero/OMERO.server/OMERO5.0__0.sql') end
