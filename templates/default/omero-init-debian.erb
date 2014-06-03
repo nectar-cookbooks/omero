@@ -4,13 +4,16 @@
 # chkconfig:    345 97 5
 # description:  OMERO server
   
-# Original author Harri Jäälinoja <harri.jaalinoja@helsinki.fi>
+# Original author - Harri Jäälinoja <harri.jaalinoja@helsinki.fi>
 # Hacked to run on ubuntu by Stephen Crawley <s.crawley@uq.edu.au>
 
 OMERO_USER=<%= @OMERO_USER %>
 OMERO_HOME=<%= @OMERO_HOME %>
   
 RETVAL=0
+
+# The hack is to replace runuser with su.  This is problematic if SELinux 
+# is enabled, but AFAIK it is OK otherwise.
   
 case "$1" in
   start|restart )
