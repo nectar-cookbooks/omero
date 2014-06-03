@@ -142,9 +142,15 @@ bash 'init-omero-db' do
   EOH
   not_if do ::File.exists?('/opt/omero/OMERO.server/OMERO5.0__0.sql') end
 end
-  
+
+if platform_family?('debian') then
+  rc_flavour = '-debian'
+else
+  rc_flavour = ''
+end
+
 template '/etc/init.d/omero' do
-  source 'omero.rc.erb'
+  source "omero-init#{rc_flavour}.erb"
   mode 0755
   variables
   ({
