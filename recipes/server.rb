@@ -135,11 +135,7 @@ bash 'init-omero-db' do
   user 'omero'
   code <<-EOH
   export HOME=/tmp
-  bin/omero db script << EOF
-
-omero_root_password
-omero_root_password
-EOF
+  bin/omero db script "" "" omero_root_password
   EOH
 end
   
