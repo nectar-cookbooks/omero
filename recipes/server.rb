@@ -134,8 +134,8 @@ bash 'init-omero-db' do
   cwd '/opt/omero/OMERO.server'
   user 'omero'
   code <<-EOH
+  export HOME=/tmp
   bin/omero db script << EOF
-
 
 omero_root_password
 omero_root_password
