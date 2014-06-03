@@ -136,6 +136,8 @@ bash 'init-omero-db' do
   code <<-EOH
   export HOME=/tmp
   bin/omero db script "" "" omero_root_password
+  psql -h localhost -U db_user omero_database < OMERO5.0__0.sql
   EOH
+  not_if do ::File.exists?('/opt/omero/OMERO.server/OMERO5.0__0.sql') end
 end
   
