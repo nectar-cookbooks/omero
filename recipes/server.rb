@@ -143,3 +143,16 @@ bash 'init-omero-db' do
   not_if do ::File.exists?('/opt/omero/OMERO.server/OMERO5.0__0.sql') end
 end
   
+template '/etc/init.d/omero' do
+  source 'omero.rc.erb'
+  mode 0755
+  variables
+  ({
+     :OMERO_USER => 'omero',
+     :OMERO_HOME => '/opt/omero/OMERO.server'
+  })            
+end
+
+service 'omero' do
+  action [ :enable, :start ]
+end
