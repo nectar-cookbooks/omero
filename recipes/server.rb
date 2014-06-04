@@ -154,8 +154,8 @@ template '/etc/init.d/omero' do
   mode 0755
   variables
   ({
-     :OMERO_USER => 'omero',
-     :OMERO_HOME => '/opt/omero/OMERO.server'
+     :omero_user => 'omero',
+     :omero_home => '/opt/omero/OMERO.server'
   })            
 end
 
