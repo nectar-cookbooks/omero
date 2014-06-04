@@ -11,6 +11,7 @@ OMERO_USER=<%= @omero_user %>
 OMERO_HOME=<%= @omero_home %>
   
 RETVAL=0
+mkdir -p /var/lock/subsys
 
 # The hack is to replace runuser with su.  This is problematic if SELinux 
 # is enabled, but AFAIK it is OK otherwise.
