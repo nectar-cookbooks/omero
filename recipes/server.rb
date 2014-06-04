@@ -27,6 +27,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+omero_install = node['omero']['install']
+omero_user = node['omero']['user']
+omero_var = node['omero']['var']
+db_user = node['omero']['db_user']
+db_password = node['omero']['db_password']
+db_name = node['omero']['db_name']
+root_password = node['omero']['root_password']
+
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
                    'python-numpy', 'python-tables', 'python-scipy',
@@ -61,86 +69,78 @@ else
   end
 end
 
-user 'omero' do
+user omero_user do
   comment 'Omero service user'
-  home '/var/omero'
+  home omero_var
   system true
   shell '/bin/false'
   supports :manage_home => true
 end
 
-directory "/opt/omero" do
-  owner 'omero'
+directory omero_install do
+  owner omero_user
 end
 
 version = '5.0.1'
 build = 'OMERO.server-5.0.1-ice35-b21'
 
-remote_file "/opt/omero/#{build}.zip" do
+remote_file "#{omero_install}/#{build}.zip" do
   source "http://downloads.openmicroscopy.org/omero/#{version}/artifacts/#{build}.zip"
   action :create_if_missing
 end
 
 bash "unpack" do
   code "unzip #{build}.zip"
-  cwd "/opt/omero"
-  user 'omero'
-  not_if do ::File.exists?("/opt/omero/#{build}") end
+  cwd omero_install
+  user omero_user
+  not_if do ::File.exists?("#{omero_install}/#{build}") end
 end
 
-link "/opt/omero/OMERO.server" do
-  to "/opt/omero/#{build}"
+link "#{omero_install}/OMERO.server" do
+  to "#{omero_install}/#{build}"
   link_type :symbolic
 end
 
 bash 'init-postgres-database' do
   user 'postgres'
   code <<-EOH
-  psql -d postgres -c "create user db_user with password 'db_password';"
-  createdb -O db_user omero_database
-  # createlang plpgsql omero_database
+  psql -d postgres -c "create user #{db_user} with password '#{db_password}';"
+  createdb -O #{db_user} #{db_name}
+  # createlang plpgsql #{db_name}
   EOH
   not_if <<-EOH
-  export PGPASSWORD=db_password
-  psql -h localhost -U db_user -l | grep -l omero_database
+  export PGPASSWORD=#{db_password}
+  psql -h localhost -U #{db_user} -l | grep -l #{db_name}
   EOH
 end
 
-user 'omero' do
-  comment 'Omero service user'
-  home '/var/omero'
-  system true
-  shell '/bin/false'
-  supports :manage_home => true
-end
-
-directory '/var/omero/data' do
-  user 'omero'
+directory "#{omero_var}/data" do
+  user omero_user
   mode 0750
 end
 
 bash 'omero-configuration' do
-  cwd '/opt/omero/OMERO.server'
-  user 'omero'
+  cwd "#{omero_install}/OMERO.server"
+  user omero_user
   code <<-EOH
-  bin/omero config set omero.db.name omero_database
-  bin/omero config set omero.db.user db_user
-  bin/omero config set omero.db.pass db_password
-  bin/omero config set omero.data.dir /var/omero/data
+  bin/omero config set omero.db.name #{db_name}
+  bin/omero config set omero.db.user #{db_user}
+  bin/omero config set omero.db.pass #{db_password}
+  bin/omero config set omero.data.dir #{omero_var}/data
   EOH
 end
 
 # 
 bash 'init-omero-db' do
-  cwd '/opt/omero/OMERO.server'
-  user 'omero'
+  cwd "#{omero_install}/OMERO.server"
+  user omero_user
   code <<-EOH
   export HOME=/tmp
-  bin/omero db script "" "" omero_root_password
-  export PGPASSWORD=db_password
-  psql -h localhost -U db_user omero_database < OMERO5.0__0.sql
+  bin/omero db script "" "" #{root_password}
+  export PGPASSWORD=#{db_password}
+  psql -h localhost -U #{db_user} #{db_name} < OMERO5.0__0.sql
   EOH
-  not_if do ::File.exists?('/opt/omero/OMERO.server/OMERO5.0__0.sql') end
+  not_if do ::File.exists?("#{omero_install}/OMERO.server/OMERO5.0__0.sql") end
 end
 
 if platform_family?('debian') then
@@ -153,8 +153,8 @@ template '/etc/init.d/omero' do
   source "omero-init#{rc_flavour}.erb"
   mode 0755
   variables({
-     :omero_user => 'omero',
-     :omero_home => '/opt/omero/OMERO.server'
+     :omero_user => omero_user,
+     :omero_home => "#{omero_install}/OMERO.server"
   })            
 end
 
