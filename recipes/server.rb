@@ -152,8 +152,7 @@ end
 template '/etc/init.d/omero' do
   source "omero-init#{rc_flavour}.erb"
   mode 0755
-  variables
-  ({
+  variables({
      :omero_user => 'omero',
      :omero_home => '/opt/omero/OMERO.server'
   })            
