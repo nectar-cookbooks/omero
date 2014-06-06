@@ -81,11 +81,30 @@ directory omero_install do
   owner omero_user
 end
 
-version = '5.0.1'
-build = 'OMERO.server-5.0.1-ice35-b21'
+BASE_URL = 'http://downloads.openmicroscopy.org/omero'
+release = node['omero']['release']
+
+unless %r{^((http|https)://.+/)?([-/]*)\.zip$} =~ release then
+  raise "The release attribute should be a ZIP filename or url."
+end
+m1 = Regexp.last_match
+unless %r{^[--]*-([0-9.]+)(-ice[0-9]+)-(b[0-9]+)$} =~ m1(2) then
+  raise "Cannot parse the release filename."
+end
+m2 = Regexp.last_match
+version = m2(1)
+build = m2(0)
+ice = m2(2)
+if m1(1) then
+  url = release
+else
+  url = "#{BASE_URL}/#{version}/artifacts/#{build}.zip"
+end
+
+puts "url = #{url}, version = #{version}, build = #{build}, ice = #{ice}"
 
 remote_file "#{omero_install}/#{build}.zip" do
-  source "http://downloads.openmicroscopy.org/omero/#{version}/artifacts/#{build}.zip"
+  source url
   action :create_if_missing
 end
 
