@@ -35,10 +35,30 @@ db_password = node['omero']['db_password']
 db_name = node['omero']['db_name']
 root_password = node['omero']['root_password']
 
+BASE_URL = 'http://downloads.openmicroscopy.org/omero'
+release = node['omero']['release']
+
+unless %r{^((http|https)://.+/)?([^/]*)\.zip$} =~ release then
+  raise "The release attribute should be a ZIP filename or url."
+end
+m1 = Regexp.last_match
+build = m1[3]
+unless %r{^[^-]*-([0-9.]+)(-ice[0-9]+)-(b[0-9]+)$} =~ build then
+  raise "Cannot parse the release filename."
+end
+m2 = Regexp.last_match
+version = m2[1]
+ice = m2[2]
+if m1[1] then
+  url = release
+else
+  url = "#{BASE_URL}/#{version}/artifacts/#{build}.zip"
+end
+
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
                    'python-numpy', 'python-tables', 'python-scipy',
-                   'zeroc-ice35', 'postgresql', 'nginx', 'mencoder' ]
+                   "zeroc#{ice}", 'postgresql', 'nginx', 'mencoder' ]
   use_pil_package = platform?('ubuntu') and 
     ( node['platform_version'] <=> '14.04') >= 0
 else
@@ -80,31 +100,6 @@ end
 directory omero_install do
   owner omero_user
 end
-
-BASE_URL = 'http://downloads.openmicroscopy.org/omero'
-release = node['omero']['release']
-
-puts "release = '#{release}'"
-unless %r{^((http|https)://.+/)?([^/]*)\.zip$} =~ release then
-  raise "The release attribute should be a ZIP filename or url."
-end
-m1 = Regexp.last_match
-build = m1[3]
-puts "build = '#{build}'"
-unless %r{^[^-]*-([0-9.]+)(-ice[0-9]+)-(b[0-9]+)$} =~ build then
-  raise "Cannot parse the release filename."
-end
-m2 = Regexp.last_match
-version = m2[1]
-ice = m2[2]
-if m1[1] then
-  url = release
-else
-  url = "#{BASE_URL}/#{version}/artifacts/#{build}.zip"
-end
-
-puts "url = #{url}, version = #{version}, build = #{build}, ice = #{ice}"
-raise "Boing!"
 
 remote_file "#{omero_install}/#{build}.zip" do
   source url
