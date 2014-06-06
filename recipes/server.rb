@@ -89,12 +89,13 @@ unless %r{^((http|https)://.+/)?([^/]*)\.zip$} =~ release then
   raise "The release attribute should be a ZIP filename or url."
 end
 m1 = Regexp.last_match
-unless %r{^[--]*-([0-9.]+)(-ice[0-9]+)-(b[0-9]+)$} =~ m1(2) then
+build = m1(2)
+puts "build = '#{build}'"
+unless %r{^[^-]*-([0-9.]+)(-ice[0-9]+)-(b[0-9]+)$} =~ build then
   raise "Cannot parse the release filename."
 end
 m2 = Regexp.last_match
 version = m2(1)
-build = m2(0)
 ice = m2(2)
 if m1(1) then
   url = release
