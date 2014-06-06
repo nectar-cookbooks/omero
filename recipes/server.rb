@@ -84,6 +84,7 @@ end
 BASE_URL = 'http://downloads.openmicroscopy.org/omero'
 release = node['omero']['release']
 
+puts "release = '#{release}'"
 unless %r{^((http|https)://.+/)?([-/]*)\.zip$} =~ release then
   raise "The release attribute should be a ZIP filename or url."
 end
