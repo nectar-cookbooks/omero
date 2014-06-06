@@ -85,7 +85,7 @@ BASE_URL = 'http://downloads.openmicroscopy.org/omero'
 release = node['omero']['release']
 
 puts "release = '#{release}'"
-unless %r{^((http|https)://.+/)?([-/]*)\.zip$} =~ release then
+unless %r{^((http|https)://.+/)?([^/]*)\.zip$} =~ release then
   raise "The release attribute should be a ZIP filename or url."
 end
 m1 = Regexp.last_match
@@ -103,6 +103,7 @@ else
 end
 
 puts "url = #{url}, version = #{version}, build = #{build}, ice = #{ice}"
+raise "Boing!"
 
 remote_file "#{omero_install}/#{build}.zip" do
   source url
