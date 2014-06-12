@@ -106,6 +106,18 @@ remote_file "#{omero_install}/#{build}.zip" do
   action :create_if_missing
 end
 
+# Shut down Omero / Omero.web while we fiddle with things ...
+service 'omero-web-stop' do
+  service_name 'omero-web'
+  action [ :stop ] 
+  only_if do ::File.exists?('/etc/init.d/omero-web') end
+end
+service 'omero-stop' do
+  service_name 'omero'
+  action [ :stop ] 
+  only_if do ::File.exists?('/etc/init.d/omero') end
+end
+
 bash "unpack" do
   code "unzip #{build}.zip"
   cwd omero_install
