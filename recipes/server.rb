@@ -114,6 +114,7 @@ service 'omero-web-stop' do
 end
 service 'omero-stop' do
   service_name 'omero'
+  pattern 'icegridnode'
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero') end
 end
@@ -188,5 +189,6 @@ template '/etc/init.d/omero' do
 end
 
 service 'omero' do
+  pattern 'icegridnode'
   action [ :enable, :start ]
 end
