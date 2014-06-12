@@ -32,11 +32,11 @@ include_recipe 'omero::server'
 omero_install = node['omero']['install']
 omero_user = node['omero']['user']
 omero_var = node['omero']['var']
-omero_web = node['omero']['web_enabled'] 
 
-directory "#{omero_var}/data" do
-  user omero_user
-  mode 0750
+# If the server might be running, stop and disable it.
+service 'omero' do
+  action [ :disable, :stop ] 
+  only_if do ::File.exists?('/etc/init.d/omero-web')
 end
 
 bash 'omero-web-internal-configuration' do
@@ -48,15 +48,3 @@ bash 'omero-web-internal-configuration' do
   EOH
 end
 
-template '/etc/init.d/omero-web' do
-  source "omero-init-web.erb"
-  mode 0755
-  variables({
-     :omero_user => omero_user,
-     :omero_home => "#{omero_install}/OMERO.server"
-  })            
-end
-
-service 'omero' do
-  action omero_web ? [ :enable, :start ] : [ :disable, :stop ] 
-end
