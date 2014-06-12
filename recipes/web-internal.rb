@@ -36,7 +36,7 @@ omero_var = node['omero']['var']
 # If the server might be running, stop and disable it.
 service 'omero' do
   action [ :disable, :stop ] 
-  only_if do ::File.exists?('/etc/init.d/omero-web')
+  only_if do ::File.exists?('/etc/init.d/omero-web') end
 end
 
 bash 'omero-web-internal-configuration' do
