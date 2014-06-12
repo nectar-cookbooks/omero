@@ -58,5 +58,5 @@ template '/etc/init.d/omero-web' do
 end
 
 service 'omero' do
-  action if omero_web then [ :enable, :start ] else [ :disable, :stop ] end
+  action omero_web ? [ :enable, :start ] : [ :disable, :stop ] 
 end
