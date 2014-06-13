@@ -47,7 +47,7 @@ bash 'omero-web-configuration' do
   code <<-EOH
   bin/omero config set omero.web.application_server "fastcgi"
   bin/omero config set omero.web.debug False
-  bin/omero web config nginx --system > /tmp/omero-nginx
+  bin/omero web config nginx --system --http 80 > /tmp/omero-nginx
   EOH
 end
 
