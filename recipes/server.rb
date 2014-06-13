@@ -108,6 +108,7 @@ end
 
 # Shut down Omero / Omero.web while we fiddle with things ...
 service 'omero-web-stop' do
+  pattern 'OMERO.server/var/django.pid'
   service_name 'omero-web'
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero-web') end
