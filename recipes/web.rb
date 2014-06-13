@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: omero
-# Recipe:: web-internal
+# Recipe:: web
 #
 # Copyright (c) 2014, The University of Queensland
 # All rights reserved.
@@ -32,19 +32,33 @@ include_recipe 'omero::server'
 omero_install = node['omero']['install']
 omero_user = node['omero']['user']
 omero_var = node['omero']['var']
+enabled = node['omero']['web_enabled']
 
 # If the server might be running, stop and disable it.
 service 'omero-web' do
-  action [ :disable, :stop ] 
+  action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero-web') end
 end
 
-bash 'omero-web-internal-configuration' do
+bash 'omero-web-configuration' do
   cwd "#{omero_install}/OMERO.server"
   user omero_user
   code <<-EOH
-  bin/omero config set omero.web.application_server development
-  bin/omero config set omero.web.debug True
+  bin/omero config set omero.web.application_server "fastcgi"
+  bin/omero config set omero.web.debug False
+  bin/omero web config nginx > /tmp/omero-nginx
   EOH
 end
 
+template '/etc/init.d/omero-web' do
+  source "omero-web-init.erb"
+  mode 0755
+  variables({
+     :omero_user => omero_user,
+     :omero_home => "#{omero_install}/OMERO.server"
+  })            
+end
+
+service 'omero-web' do
+  action enabled ? [ :enable, :start ] : [ :disabled ]
+end
