@@ -50,8 +50,14 @@ bash 'omero-web-configuration' do
   EOH
 end
 
+if platform_family?('debian') then
+  rc_flavour = '-debian'
+else
+  rc_flavour = ''
+end
+
 template '/etc/init.d/omero-web' do
-  source "omero-web-init.erb"
+  source "omero-web-init#{rc_flavour}.erb"
   mode 0755
   variables({
      :omero_user => omero_user,

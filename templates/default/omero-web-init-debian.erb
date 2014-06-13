@@ -10,27 +10,31 @@
 OMERO_USER=<%= @omero_user %>
 OMERO_HOME=<%= @omero_home %>
   
-. /etc/init.d/functions
 RETVAL=0
+mkdir -p /var/lock/subsys
+
+# The debian version replaces runuser with su.  This is problematic if SELinux 
+# is enabled, but AFAIK it is OK otherwise.
   
 case "$1" in
-  start | restart )
+  start|restart )
     [ "$1" = start ] && _P=start || _P=restart
   
     # start (or restart) OMERO web server
-    runuser -s /bin/bash - $OMERO_USER -c \
-      "ulimit -c 81920; $OMERO_HOME/bin/omero web $_P"
+    su -s /bin/bash -c \
+      "ulimit -c 81920; $OMERO_HOME/bin/omero web $_P" \
+      $OMERO_USER 
   
     RETVAL=$?; echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
     exit $RETVAL ;;
   
   stop )
-    runuser -s /bin/bash - $OMERO_USER -c "$Env $OMERO_HOME/bin/omero web stop"
+    su -s /bin/bash -c "$OMERO_HOME/bin/omero web stop" $OMERO_USER 
     RETVAL=$?; echo; [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/`basename $0`
     exit $RETVAL ;;
 
   status )
-    runuser -s /bin/bash - $OMERO_USER -c "$Env $OMERO_HOME/bin/omero web status"
+    su -s /bin/bash -c "$OMERO_HOME/bin/omero web status" $OMERO_USER 
     RETVAL=$?; echo
     exit $RETVAL ;;
 
