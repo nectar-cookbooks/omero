@@ -14,6 +14,12 @@ password in a node attribute ... which only works in Chef Server mode.)
 Refer to the postgres cookbook's README file for more details, and 
 instructions on how to generate the password hash.
 
+You need to open external firewall access on ports 4063 and 4064 for
+OMERO.service, and optionally ports 80 and 443 for Omero.web.  (For NeCTAR
+you need to do this via the Dashboard; to to your project's "Access & 
+Security" panel, click "Edit Rules", then "Add Rule", fill in the port 
+and "Add".  Repeat for each port you need to open.)
+
 Recipes:
 --------
 
@@ -23,7 +29,7 @@ to the standard OMERO instructions.
 The `omero::web` recipe runs the server recipe, and then installs and 
 configures OMERO.web using Nginx as the front-end web-server.
 
-The `omero::web-internel` recipe runs the server recipe, and then installs and 
+The `omero::web-internal` recipe runs the server recipe, and then installs and 
 configures Omero.web in development mode.  (The omero-web service is disabled,
 and you need to run it by hand using ".../OMERO.server/bin/omero web start".)
 
@@ -34,7 +40,8 @@ The following attributes control aspects of the OMERO installation:
 
 * `node['omero']['release']` - The OMERO release to be installed.  This can be either the URL for the OMERO.server downloadable, or its basename.  Note that this recipe only supports 5.x releases.
 * `node['omero']['install']` - The OMERO installation directory; defaults to 
-"/opt/omero".
+"/opt/omero".  The installation will be created as a subdirectory of this,
+and an "OMERO.server" symlink will be created to the installation.
 * `node['omero']['user']` - The OMERO service user name; defaults to "omero".
 * `node['omero']['var']` - The OMERO server's 'var' directory; defaults to 
 "/var/omero".
@@ -49,18 +56,66 @@ defaults to "omero_database".
 * `node['omero']['web_enabled']` - This tells the `omero::web` recipe to
 enable or disable the `omero-web` init script; defaults to true.
 
+Starting and stopping services
+------------------------------
+
+The recipe installs service scripts in "/etc/init.d" so that you can start
+and stop the services.  The "omero" script is for the OMERO.service services,
+and the "omero-web" script is for the OMERO.web services.
+
+For example:
+
+```
+  $ sudo /etc/init.d/omero start      # starts the OMERO service
+  $ sudo /etc/init.d/omero stop       # stops the OMERO service
+  $ sudo /etc/init.d/omero restart    # stops and starts the OMERO service
+```
+
+More documentation
+------------------
+
+For more documentation, please refer to the relevant OMERO documention 
+pages on their support site:
+
+* http://www.openmicroscopy.org/site/support/omero5/
+
+The installation documentation has various hints and links on checking
+things are working, and diagnosing problems:
+
+* http://www.openmicroscopy.org/site/support/omero5/sysadmins/unix/server-installation.html
+
 Limitations
 -----------
 
 The cookbook only works on Ubuntu "trusty" at the moment, and only supports 
 Nginx as the webserver front-end.
 
+For reasons I haven't yet been able to determine, when we start the OMERO using
+the out-of-the-box version of "/opt/omero/OMERO.server/etc/grid/default.xml",
+the Glacier2 service that acts as the firewall for the rest of the services
+does not "listen" on the host's external IP address.  As an interim solution,
+you need to:
+
+1. open the above file in an editor,
+2. go to the line that says "client-endpoints",
+3. add "-h $${omero.host}" to the "ssl" and "tcp"; e.g. before the "-p" 
+   options, and
+4. restart Omero.server; e.g. run "sudo /etc/init.d/omero restart".
+
+Once that is done, run "netstat -an | less" and check that there are
+LISTEN entries for "tcp" with ports 4063 and 4046 and your machine's
+IPv4 address.
+
 TO DO List
 ----------
 
-* We are not yet doing anything about backup or firewalls.
+* We are not yet doing anything about backup or internal firewalls.
 * We are not attempting to configure advanced options such as LDAP, 
   OMERO.dropbox, though apparently OMERO.dropbox is running ...
-* Support more platforms
+* Support for Omero.web needs more work / testing
+* Support more OS platforms
 * Support Apache web front-end.
-
+* Support for SSL i.e. generating and configuring a certificate
+* Support for updating Omero
+* Support for rerunning with different usernames, passwords, etc.
+* Support for installing clients
