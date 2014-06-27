@@ -19,7 +19,7 @@ node.default['omero']['web']['http_port'] = 80
 
 # The recipe used to install and configure the frontend webserver.  If unset,
 # the 'web.rb' recipe intuits one based on the 'frontend' attribute.
-node.default['omero']['web']['recipe'] = ''
+node.default['omero']['web']['recipe'] = nil
 
 # If this is true, we attempt to inject suitable reverse proxy configs into
 # the frontend webserver configurations.

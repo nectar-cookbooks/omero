@@ -60,7 +60,7 @@ if web_frontend then
   elsif web_frontend == 'nginx' then
     web_recipe ||= 'nginx::default'     
   else 
-    raise "Unsupported web frontend"
+    raise "Unsupported web frontend #{web_frontend}"
   end
   include_recipe web_recipe
   if web_configure then
