@@ -32,7 +32,11 @@ include_recipe 'omero::server'
 omero_install = node['omero']['install']
 omero_user = node['omero']['user']
 omero_var = node['omero']['var']
-enabled = node['omero']['web_enabled']
+enabled = node['omero']['web']['enabled']
+web_frontend = node['omero']['web']['frontend']
+web_port = node['omero']['web']['http_port']
+web_configure = node['omero']['web']['configure']
+web_recipe = node['omero']['web']['recipe']
 
 # If the server might be running, stop and disable it.
 service 'omero-web' do
@@ -45,11 +49,32 @@ bash 'omero-web-configuration' do
   cwd "#{omero_install}/OMERO.server"
   user omero_user
   code <<-EOH
-  bin/omero config set omero.web.application_server "fastcgi"
-  bin/omero config set omero.web.debug False
-  bin/omero web config nginx --system --http 80 > /tmp/omero-nginx
+    bin/omero config set omero.web.application_server "fastcgi"
+    bin/omero config set omero.web.debug False
   EOH
 end
+
+if web_frontend then
+  if web_frontend == 'apache' then
+    web_recipe ||= 'apache::default' 
+  elsif web_frontend == 'nginx' then
+    web_recipe ||= 'nginx::default'     
+  else 
+    raise "Unsupported web frontend"
+  end
+  include_recipe web_recipe
+  if web_configure then
+    web_opts = "--system --http #{web_port}"
+    bash 'omero-web-frontend' do
+      cwd "#{omero_install}/OMERO.server"
+      user omero_user
+      code <<-EOH
+        bin/omero web config #{web_frontend} #{web_opts} > /tmp/omero-stanza
+      EOH
+    end
+  end
+end
+
 
 if platform_family?('debian') then
   rc_flavour = '-debian'
