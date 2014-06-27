@@ -55,10 +55,16 @@ bash 'omero-web-configuration' do
 end
 
 if web_frontend then
-  if web_frontend == 'apache' then
-    web_recipe ||= 'apache::default' 
+  if web_frontend == 'apache2' then
+    web_recipe ||= 'apache2::default'
+    ensite = 'a2ensite'
+    dissite = 'a2dissite'
+    http = node['apache']['dir']
   elsif web_frontend == 'nginx' then
     web_recipe ||= 'nginx::default'     
+    ensite = 'nxensite'
+    dissite = 'nxdissite'
+    http = node['nginx']['dir']
   else 
     raise "Unsupported web frontend #{web_frontend}"
   end
@@ -69,7 +75,10 @@ if web_frontend then
       cwd "#{omero_install}/OMERO.server"
       user omero_user
       code <<-EOH
-        bin/omero web config #{web_frontend} #{web_opts} > /tmp/omero-stanza
+        bin/omero web config #{web_frontend} #{web_opts} \
+                > #{http}/sites-available/omero
+        #{dissite} default
+        #{ensite} omero
       EOH
     end
   end
