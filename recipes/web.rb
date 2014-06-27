@@ -73,7 +73,6 @@ if web_frontend then
     web_opts = "--system --http #{web_port}"
     bash 'omero-web-frontend' do
       cwd "#{omero_install}/OMERO.server"
-      user omero_user
       code <<-EOH
         bin/omero web config #{web_frontend} #{web_opts} \
                 > #{http}/sites-available/omero
