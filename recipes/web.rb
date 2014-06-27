@@ -74,7 +74,7 @@ if web_frontend then
     bash 'omero-web-frontend' do
       cwd "#{omero_install}/OMERO.server"
       code <<-EOH
-        bin/omero web config #{web_frontend} #{web_opts} \
+        sudo -u #{omero_user} bash -c "export HOME=/tmp ; bin/omero web config #{web_frontend} #{web_opts}" \
                 > #{http}/sites-available/omero
         #{dissite} default
         #{ensite} omero
