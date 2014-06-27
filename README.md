@@ -90,22 +90,6 @@ Limitations
 The cookbook only works on Ubuntu "trusty" at the moment, and only supports 
 Nginx as the webserver front-end.
 
-For reasons I haven't yet been able to determine, when we start the OMERO using
-the out-of-the-box version of "/opt/omero/OMERO.server/etc/grid/default.xml",
-the Glacier2 service that acts as the firewall for the rest of the services
-does not "listen" on the host's external IP address.  As an interim solution,
-you need to:
-
-1. open the above file in an editor,
-2. go to the line that says "client-endpoints",
-3. add "-h $${omero.host}" to the "ssl" and "tcp"; e.g. before the "-p" 
-   options, and
-4. restart Omero.server; e.g. run "sudo /etc/init.d/omero restart".
-
-Once that is done, run "netstat -an | less" and check that there are
-LISTEN entries for "tcp" with ports 4063 and 4046 and your machine's
-IPv4 address.
-
 TO DO List
 ----------
 
