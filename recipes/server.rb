@@ -150,6 +150,9 @@ directory "#{omero_var}/data" do
   mode 0750
 end
 
+# (For reasons that we don't understand, it is necessary to tell Ice
+# to use the virtual's IP address as the default host.  This ought to
+# happen without us saying so, but ...)
 bash 'omero-configuration' do
   cwd "#{omero_install}/OMERO.server"
   user omero_user
@@ -158,6 +161,7 @@ bash 'omero-configuration' do
   bin/omero config set omero.db.user #{db_user}
   bin/omero config set omero.db.pass #{db_password}
   bin/omero config set omero.data.dir #{omero_var}/data
+  bin/omero config set Ice.Default.Host #{node['ipaddress']}
   EOH
 end
 
