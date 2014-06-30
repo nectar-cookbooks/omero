@@ -25,7 +25,8 @@ case "$1" in
       "ulimit -c 81920; $OMERO_HOME/bin/omero web $_P" \
       $OMERO_USER 
   
-    RETVAL=$?; echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
+    RETVAL=$?;
+    echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
     exit $RETVAL ;;
   
   stop )

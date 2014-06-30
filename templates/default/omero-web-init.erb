@@ -21,7 +21,11 @@ case "$1" in
     runuser -s /bin/bash - $OMERO_USER -c \
       "ulimit -c 81920; $OMERO_HOME/bin/omero web $_P"
   
-    RETVAL=$?; echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
+    RETVAL=$?;
+    if [ -e $OMERO_HOME/var/django_fcgi.sock ] ; then
+	chmod 777 $OMERO_HOME/var/django_fcgi.sock
+    fi
+    echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
     exit $RETVAL ;;
   
   stop )
