@@ -32,7 +32,11 @@ include_recipe 'omero::server'
 omero_install = node['omero']['install']
 omero_user = node['omero']['user']
 omero_var = node['omero']['var']
-enabled = node['omero']['web_enabled']
+enabled = node['omero']['web']['enabled']
+web_frontend = node['omero']['web']['frontend']
+web_port = node['omero']['web']['http_port']
+web_configure = node['omero']['web']['configure']
+web_recipe = node['omero']['web']['recipe']
 
 # If the server might be running, stop and disable it.
 service 'omero-web' do
@@ -45,11 +49,42 @@ bash 'omero-web-configuration' do
   cwd "#{omero_install}/OMERO.server"
   user omero_user
   code <<-EOH
-  bin/omero config set omero.web.application_server "fastcgi"
-  bin/omero config set omero.web.debug False
-  bin/omero web config nginx --system --http 80 > /tmp/omero-nginx
-  EOH
+    bin/omero config set omero.web.application_server "fastcgi"
+    bin/omero config set omero.web.debug False
+    bin/omero config set omero.web.server_list \
+            '[["#{node['ipaddress']}", 4064, "omero"]]'
+    EOH
 end
+
+if web_frontend then
+  if web_frontend == 'apache2' then
+    web_recipe ||= 'apache2::default'
+    ensite = 'a2ensite'
+    dissite = 'a2dissite'
+    http = node['apache']['dir']
+  elsif web_frontend == 'nginx' then
+    web_recipe ||= 'nginx::default'     
+    ensite = 'nxensite'
+    dissite = 'nxdissite'
+    http = node['nginx']['dir']
+  else 
+    raise "Unsupported web frontend #{web_frontend}"
+  end
+  include_recipe web_recipe
+  if web_configure then
+    web_opts = "--system --http #{web_port}"
+    bash 'omero-web-frontend' do
+      cwd "#{omero_install}/OMERO.server"
+      code <<-EOH
+        sudo -u #{omero_user} bash -c "export HOME=/tmp ; bin/omero web config #{web_frontend} #{web_opts}" \
+                > #{http}/sites-available/omero
+        #{dissite} default
+        #{ensite} omero
+      EOH
+    end
+  end
+end
+
 
 if platform_family?('debian') then
   rc_flavour = '-debian'
