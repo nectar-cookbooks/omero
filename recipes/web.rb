@@ -51,7 +51,9 @@ bash 'omero-web-configuration' do
   code <<-EOH
     bin/omero config set omero.web.application_server "fastcgi"
     bin/omero config set omero.web.debug False
-  EOH
+    bin/omero config set omero.web.server_list \
+            '[["#{node[ipaddress]}", 4064, "omero"]]'
+    EOH
 end
 
 if web_frontend then
