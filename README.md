@@ -14,11 +14,16 @@ password in a node attribute ... which only works in Chef Server mode.)
 Refer to the postgres cookbook's README file for more details, and 
 instructions on how to generate the password hash.
 
-You need to open external firewall access on ports 4063 and 4064 for
-OMERO.service, and optionally ports 80 and 443 for Omero.web.  (For NeCTAR
-you need to do this via the Dashboard; to to your project's "Access & 
-Security" panel, click "Edit Rules", then "Add Rule", fill in the port 
-and "Add".  Repeat for each port you need to open.)
+You need to open firewall access on ports 4063 and 4064 for
+OMERO.service, and optionally ports 80 and 443 for Omero.web.  (If you 
+use non-standard ports, adjust accordingly.)  
+
+For a NeCTAR virtual, you need to open the external firewall ports using
+the NeCTAR Dashboard:
+1. Go to your project's "Access & Security" panel
+2. Click "Edit Rules".
+3. Click "Add Rule", fill in the port and then "Add".  
+4. Repeat for each port you need to open.
 
 Recipes:
 --------
@@ -36,7 +41,7 @@ and you need to run it by hand using ".../OMERO.server/bin/omero web start".)
 Attributes:
 -----------
 
-The following attributes control aspects of the OMERO installation:
+The following attributes control the main OMERO installation recipe:
 
 * `node['omero']['release']` - The OMERO release to be installed.  This can be either the URL for the OMERO.server downloadable, or its basename.  Note that this recipe only supports 5.x releases.
 * `node['omero']['install']` - The OMERO installation directory; defaults to 
@@ -53,8 +58,22 @@ password; defaults to "db_password".  THIS SHOULD BE CHANGED.
 defaults to "omero_database".
 * `node['omero']['root_password']` - The OMERO root password; defaults to 
 "omero_root_password".  THIS SHOULD BE CHANGED.
-* `node['omero']['web_enabled']` - This tells the `omero::web` recipe to
+
+The following attributes control the OMERO web recipes:
+
+* `node['omero']['web']['enabled']` - This tells the `omero::web` recipe to
 enable or disable the `omero-web` init script; defaults to true.
+* `node['omero']['web']['frontend']` - Select the frontend webserver.  
+Currently, only 'nginx' is supported.
+* `node['omero']['web']['http_port']` - Select frontend webserver's HTTP port;  
+defaults to 80.
+* `node['omero']['web']['recipe']` - Select the Chef recipe to use to install
+the frontend webserver.  By default, we use the "standard" Chef Community 
+cookbook.
+* `node['omero']['web']['configure']` - If true, the web recipe will attempt 
+to configure the frontend webserver on the assumption that it only needs to 
+support Omero.web.  If false, we don't touch the frontend configuration.  
+Defaults to true. 
 
 Starting and stopping services
 ------------------------------
@@ -70,6 +89,21 @@ For example:
   $ sudo /etc/init.d/omero stop       # stops the OMERO service
   $ sudo /etc/init.d/omero restart    # stops and starts the OMERO service
 ```
+
+Testing
+-------
+
+If the OMERO.server installation is working, you should be use OMERO.client
+tools to talk to the server on (at least) port 4063 of the server, using the
+server's external IP address or hostname.  (The OMERO.client tools can be
+downloaded and installed on Windows, Mac and Linux machines.)
+
+If the OMERO.web installation is working, you should be able to access the
+OMERO web service using a web browser.  Use "http://<IP-address>/" as the URL,
+where <IP> is the IP address of the server.  (If you have configured the server
+to use a non-standard port, include that in the URL.)
+
+In both cases, you can use the "root" account and password for initial testing.
 
 More documentation
 ------------------
@@ -87,8 +121,8 @@ things are working, and diagnosing problems:
 Limitations
 -----------
 
-The cookbook only works on Ubuntu "trusty" at the moment, and only supports 
-Nginx as the webserver front-end.
+The cookbook only works on Ubuntu 14.04 ("trusty") at the moment, and 
+only supports nginx as the webserver front-end.
 
 TO DO List
 ----------

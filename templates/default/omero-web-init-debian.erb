@@ -21,19 +21,11 @@ case "$1" in
     [ "$1" = start ] && _P=start || _P=restart
   
     # start (or restart) OMERO web server
-    rm $OMERO_HOME/var/django_fcgi.sock
     su -s /bin/bash -c \
       "ulimit -c 81920; $OMERO_HOME/bin/omero web $_P" \
       $OMERO_USER 
   
-    RETVAL=$?
-    if [ $RETVAL -eq 0 ] ; then
-	while [ ! -e $OMERO_HOME/var/django_fcgi.sock ] ; do
-	    sleep 1
-	done
-	chmod 777 $OMERO_HOME/var/django_fcgi.sock
-    fi
-    echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
+    RETVAL=$?; echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
     exit $RETVAL ;;
   
   stop )

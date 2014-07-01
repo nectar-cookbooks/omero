@@ -3,7 +3,7 @@ maintainer "Stephen Crawley"
 maintainer_email "s.crawley at uq dot edu dot au"
 license "BSD"
 description "Recipes for installing Omero server"
-version "0.5.2"
+version "0.5.3"
 
 depends "java", ">= 1.13.0"
 depends "python"
