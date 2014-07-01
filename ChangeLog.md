@@ -1,6 +1,10 @@
 Change Log for the Omero cookbook
 =================================
 
+Version 0.5.3
+-----------
+ - Use fastcgi-tcp instead of fastcgi (Issue #5)
+
 Version 0.5.2
 -----------
  - First working version of "omero::web" recipe.
