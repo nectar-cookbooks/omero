@@ -49,7 +49,7 @@ bash 'omero-web-configuration' do
   cwd "#{omero_install}/OMERO.server"
   user omero_user
   code <<-EOH
-    bin/omero config set omero.web.application_server "fastcgi"
+    bin/omero config set omero.web.application_server "fastcgi-tcp"
     bin/omero config set omero.web.debug False
     bin/omero config set omero.web.server_list \
             '[["#{node['ipaddress']}", 4064, "omero"]]'
