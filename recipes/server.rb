@@ -64,7 +64,8 @@ if platform_family?('debian') then
 elsif platform_family?('fedora') then
   dependencies = [ 'zip', 'python', 'python-devel', 'python-matplotlib',
                    'numpy', 'python-tables', 'scipy',
-                   "zeroc#{ice}", 'postgresql', 'mencoder' ]
+                   'ice', 'ice-python', 'ice-servers', 
+                   'postgresql', 'mencoder' ]
 else
   raise 'Platform not supported ...'
 end
