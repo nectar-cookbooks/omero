@@ -12,7 +12,7 @@ node.default['omero']['root_password'] = 'omero_root_password'
 # is enabled / started or disabled / stopped by the recipe.
 node.default['omero']['web']['enabled'] = true
 
-# The choices will be nginx or apache
+# The supported choices are 'nginx' or 'apache'
 node.default['omero']['web']['frontend'] = 'nginx'
 
 node.default['omero']['web']['http_port'] = 80

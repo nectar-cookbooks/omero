@@ -57,7 +57,7 @@ bash 'omero-web-configuration' do
 end
 
 if web_frontend then
-  if web_frontend == 'apache2' then
+  if web_frontend == 'apache' then
     web_recipe ||= 'apache2::default'
     ensite = 'a2ensite'
     dissite = 'a2dissite'
