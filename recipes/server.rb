@@ -58,7 +58,7 @@ end
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
                    'python-numpy', 'python-tables', 'python-scipy',
-                   "zeroc#{ice}", 'postgresql', 'nginx', 'mencoder' ]
+                   "zeroc#{ice}", 'postgresql', 'mencoder' ]
   use_pil_package = platform?('ubuntu') and 
     ( node['platform_version'] <=> '14.04') >= 0
 else
