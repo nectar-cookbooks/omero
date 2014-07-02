@@ -63,7 +63,7 @@ if platform_family?('debian') then
     ( node['platform_version'] <=> '14.04') >= 0
 elsif platform_family?('fedora') then
   dependencies = [ 'zip', 'python', 'python-devel', 'python-matplotlib',
-                   'python-numpy', 'python-tables', 'python-scipy',
+                   'numpy', 'python-tables', 'scipy',
                    "zeroc#{ice}", 'postgresql', 'mencoder' ]
 else
   raise 'Platform not supported ...'
