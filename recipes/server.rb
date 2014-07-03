@@ -103,7 +103,7 @@ else
                       'zlib-devel']
   else
     raise 'Platform not supported ...'
-  ens
+  end
   pil_build_deps.each() do |pkg|
     package pkg do
     end
