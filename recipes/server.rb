@@ -75,7 +75,7 @@ if enable_rpmfusion_free then
   # Fedora specific ...
   bash "enable rpmfusion" do
     code <<-EOF
-    yum localinstall --nogpgcheck \
+    yum -y localinstall --nogpgcheck \
       http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm 
     EOF
   end
