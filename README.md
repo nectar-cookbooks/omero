@@ -121,13 +121,22 @@ things are working, and diagnosing problems:
 Limitations
 -----------
 
-The cookbook only works on Ubuntu 14.04 at the moment, and 
+The cookbook only works on Ubuntu 14.04 and Fedora 19/20 at the moment, and 
 only supports 'nginx' as the webserver front-end.
 
 I have tried to get 'apache' working on Ubuntu 14.04, but at this time the
 community cookbook for Apache2 does not support Apache 2.4.  Since Apache 2.4 
 is the standard for Ubuntu 13.10 and Fedora 19+, that means the 'apache' 
 won't work there either.
+
+Fedora support requires a fix to the community "postgresql" cookbook.  I've
+sent a pull request, but in the meantime you can get hold of the fixes by
+adding this line to your Berksfile, updating and re-vendoring.
+
+```
+cookbook 'postgresql', github: 'crawley/postgresql', branch: 'fedora16+fixes'
+
+```
 
 TO DO List
 ----------
@@ -142,3 +151,4 @@ TO DO List
 * Support for rerunning with different usernames, passwords, etc.
 * Support for installing clients
 * Support for apache frontends (depending on community cookbook updates).
+* Support for updating postgresql(?).
