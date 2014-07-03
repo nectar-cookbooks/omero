@@ -65,9 +65,20 @@ elsif platform_family?('fedora') then
   dependencies = [ 'zip', 'python', 'python-devel', 'python-matplotlib',
                    'numpy', 'python-tables', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
-                   'postgresql', 'mencoder' ]
+                   'postgresql', 'mencoder']
+  enable_rpmfusion_free = true
 else
   raise 'Platform not supported ...'
+end
+
+if enable_rpmfusion_free then
+  # Fedora specific ...
+  bash "enable rpmfusion" do
+    code <<-EOF
+    yum localinstall --nogpgcheck \
+      http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm 
+    EOF
+  end
 end
 
 include_recipe 'postgres::default'
