@@ -62,10 +62,9 @@ if platform_family?('debian') then
   pil_package = 'python-pil' if platform?('ubuntu') and 
                                 ( node['platform_version'] <=> '14.04') >= 0
 elsif platform_family?('fedora') then
-  dependencies = [ 'zip', 'python', 'python-devel', 'python-matplotlib',
-                   'numpy', 'python-tables', 'scipy',
-                   'ice', 'ice-python', 'ice-servers', 
-                   'postgresql', 'mencoder']
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
+                   'python-matplotlib', 'numpy', 'python-tables', 'scipy',
+                   'ice', 'ice-python', 'ice-servers', 'postgresql', 'mencoder']
   enable_rpmfusion_free = true
   # pil_package = 'python-pillow'
 else
