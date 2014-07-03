@@ -82,7 +82,8 @@ if enable_rpmfusion_free then
   end
 end
 
-include_recipe 'postgres::default'
+include_recipe 'postgres::client'
+include_recipe 'postgres::server'
 
 include_recipe 'java::default'
 
