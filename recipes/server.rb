@@ -66,7 +66,6 @@ elsif platform_family?('fedora') then
                    'numpy', 'python-tables', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
                    'postgresql', 'mencoder']
-  use_pil_package = true
   enable_rpmfusion_free = true
 else
   raise 'Platform not supported ...'
@@ -93,13 +92,19 @@ end
 if use_pil_package then
   package 'python-pil' do
   end
-else 
+else
   # If we can't install 'pil' from the package manager, build from source.
   include_recipe 'python::default'
-  # These are debian / ubuntu package dependencies ...
-  pip_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
-                    'zlib1g-dev']
-  pip_build_deps.each() do |pkg|
+  if platform_family?('debian') then
+    pil_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
+                      'zlib1g-dev']
+  elsif platform_family?('rhel', 'fedora') then
+    pil_build_deps = ['python-devel', 'libjpeg-devel', 'libtiff-devel', 
+                      'zlib-devel']
+  else
+    raise 'Platform not supported ...'
+  ens
+  pil_build_deps.each() do |pkg|
     package pkg do
     end
   end
