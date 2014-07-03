@@ -58,14 +58,32 @@ end
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
                    'python-numpy', 'python-tables', 'python-scipy',
-                   "zeroc#{ice}", 'postgresql', 'nginx', 'mencoder' ]
-  use_pil_package = platform?('ubuntu') and 
-    ( node['platform_version'] <=> '14.04') >= 0
+                   "zeroc#{ice}", 'postgresql', 'mencoder' ]
+  pil_package = 'python-pil' if platform?('ubuntu') and 
+                                ( node['platform_version'] <=> '14.04') >= 0
+elsif platform_family?('fedora') then
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
+                   'python-matplotlib', 'numpy', 'python-tables', 'scipy',
+                   'ice', 'ice-python', 'ice-servers', 
+                   'postgresql-server', 'mencoder']
+  enable_rpmfusion_free = true
+  # pil_package = 'python-pillow'
 else
   raise 'Platform not supported ...'
 end
 
-include_recipe 'postgres::default'
+if enable_rpmfusion_free then
+  # Fedora specific ...
+  bash "enable rpmfusion" do
+    code <<-EOF
+    yum -y localinstall --nogpgcheck \
+      http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm 
+    EOF
+  end
+end
+
+include_recipe 'postgresql::client'
+include_recipe 'postgresql::server'
 
 include_recipe 'java::default'
 
@@ -73,19 +91,28 @@ dependencies.each() do |pkg|
   package pkg
 end
 
-if use_pil_package then
-  package 'python-pil' do
+if pil_package then
+  package pil_package do
   end
-else 
+else
   # If we can't install 'pil' from the package manager, build from source.
   include_recipe 'python::default'
-  pip_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
-                    'zlib1g-dev']
-  pip_build_deps.each() do |pkg|
+  if platform_family?('debian') then
+    pil_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
+                      'zlib1g-dev']
+    pil = 'pil'
+  elsif platform_family?('rhel', 'fedora') then
+    pil_build_deps = ['python-devel', 'libjpeg-devel', 'libtiff-devel', 
+                      'zlib-devel']
+    pil = 'pillow'
+  else
+    raise 'Platform not supported ...'
+  end
+  pil_build_deps.each() do |pkg|
     package pkg do
     end
   end
-  python_pip 'pil' do
+  python_pip pil do
   end
 end
 
