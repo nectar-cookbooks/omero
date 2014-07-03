@@ -7,7 +7,7 @@ version "0.5.3"
 
 depends "java", ">= 1.13.0"
 depends "python"
-depends "postgres"
+depends "postgresql"
 depends "apache"
 depends "nginx"
 
