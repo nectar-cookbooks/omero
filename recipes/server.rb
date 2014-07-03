@@ -64,7 +64,8 @@ if platform_family?('debian') then
 elsif platform_family?('fedora') then
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
                    'python-matplotlib', 'numpy', 'python-tables', 'scipy',
-                   'ice', 'ice-python', 'ice-servers', 'postgresql', 'mencoder']
+                   'ice', 'ice-python', 'ice-servers', 
+                   'postgresql-server', 'mencoder']
   enable_rpmfusion_free = true
   # pil_package = 'python-pillow'
 else
