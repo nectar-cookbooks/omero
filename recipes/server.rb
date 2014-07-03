@@ -61,7 +61,7 @@ if platform_family?('debian') then
                    "zeroc#{ice}", 'postgresql', 'mencoder' ]
   pil_package = 'python-pil' if platform?('ubuntu') and 
                                 ( node['platform_version'] <=> '14.04') >= 0
-elsif platform_family?('fedora') then
+elsif platform_family?('fedora', 'rhel') then
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
                    'python-matplotlib', 'numpy', 'python-tables', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
