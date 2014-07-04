@@ -120,7 +120,9 @@ end
 # For any platforms that have an old version of postgresql ...
 if platform_family?('rhel') && node['platform_version'].to_f() < 7.0 then
   node.normal['postgresql']['version'] = '9.3'
-  include_recipe 'postgresql::yum_pgdg_postgresql'
+  node.normal['postgresql']['enable_pgdg_yum'] = true
+  node.normal['postgresql']['client']['packages'] = ["postgresql93"]
+  node.normal['postgresql']['server']['packages'] = ["postgresql93-server"]
 end
 
 include_recipe 'postgresql::client'
