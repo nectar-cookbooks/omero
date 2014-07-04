@@ -59,32 +59,31 @@ pips = []
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
                    'python-numpy', 'python-scipy', 'python_tables',
-                   "zeroc#{ice}", 'postgresql', 'mencoder' ]
+                   "zeroc#{ice}", 'mencoder' ]
   
   if platform?('ubuntu') and ( node['platform_version'] <=> '14.04') >= 0
     dependencies << 'python-pil'
   else
     pips = [ { 'module' => 'pil',
-               'deps' => ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
-                          'zlib1g-dev']
+               'deps' => [ 'python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
+                           'zlib1g-dev' ]
              } ]
   end
     
 elsif platform_family?('fedora') then
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python_tables',
                    'python-pillow', 'python-matplotlib', 'numpy', 'scipy',
-                   'ice', 'ice-python', 'ice-servers', 
-                   'postgresql-server', 'mencoder']
+                   'ice', 'ice-python', 'ice-servers', 'mencoder' ]
   enable_rpmfusion_free = true
+
 elsif platform_family?('rhel') then
   # Note that we are not installing any version of mencoder ...
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
                    'python-matplotlib', 'numpy', 'scipy',
-                   'ice', 'ice-python', 'ice-servers', 
-                   'postgresql-server']
+                   'ice', 'ice-python', 'ice-servers' ]
   pips = [ { 'module' => 'pillow',
-             'deps' => ['python-devel', 'libjpeg-devel', 'libtiff-devel', 
-                        'zlib-devel']
+             'deps' => [ 'python-devel', 'libjpeg-devel', 'libtiff-devel', 
+                         'zlib-devel' ]
            },
            { 'module' => 'numexpr',
              'version' => '1.4.2',
@@ -92,7 +91,7 @@ elsif platform_family?('rhel') then
            },
            { 'module' => 'tables',
              'version' => '2.4.0',
-             'deps' => ['gcc', 'Cython', 'hdf5-devel']
+             'deps' => [ 'gcc', 'Cython', 'hdf5-devel' ]
            }
          ]
   enable_rpmfusion_free = true
@@ -102,6 +101,8 @@ elsif platform_family?('rhel') then
     source 'http://download.zeroc.com/Ice/3.5/el6/zeroc-ice-el6.repo'
     not_if { ::File.exists?('/etc/yum.repos.d/zeroc-ice-el6.repo') }
   end
+
+  # And the ugly way to load postgres
 else
   raise "Platform / family not supported: #{node['platform']} / #{node['platform_family']}"
 end
@@ -115,6 +116,8 @@ if enable_rpmfusion_free then
     EOF
   end
 end
+
+node.normal['postgresql']['version'] = '9.3'
 
 include_recipe 'postgresql::client'
 include_recipe 'postgresql::server'
