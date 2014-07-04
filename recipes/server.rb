@@ -70,10 +70,11 @@ elsif platform_family?('fedora') then
   enable_rpmfusion_free = true
   pil_package = 'python-pillow'
 elsif platform_family?('rhel') then
+  # Note that we are not installing any version of mencoder ...
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
                    'python-matplotlib', 'numpy', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
-                   'postgresql-server', 'mencoder']
+                   'postgresql-server']
   enable_rpmfusion_free = true
   tables_package = nil
   # Ugly way to add the ZeroC repo ...
