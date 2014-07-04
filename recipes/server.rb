@@ -59,9 +59,9 @@ pips = []
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
                    'python-numpy', 'python-scipy', 'python_tables',
-                   "zeroc#{ice}", 'mencoder' ]
+                   "zeroc#{ice}", 'mencoder', 'postgresql' ]
   
-  if platform?('ubuntu') and ( node['platform_version'] <=> '14.04') >= 0
+  if platform?('ubuntu') && ( node['platform_version'] <=> '14.04') >= 0
     dependencies << 'python-pil'
   else
     pips = [ { 'module' => 'pil',
@@ -73,7 +73,8 @@ if platform_family?('debian') then
 elsif platform_family?('fedora') then
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python_tables',
                    'python-pillow', 'python-matplotlib', 'numpy', 'scipy',
-                   'ice', 'ice-python', 'ice-servers', 'mencoder' ]
+                   'ice', 'ice-python', 'ice-servers', 'mencoder', 
+                   'postgresql-server' ]
   enable_rpmfusion_free = true
 
 elsif platform_family?('rhel') then
@@ -102,7 +103,6 @@ elsif platform_family?('rhel') then
     not_if { ::File.exists?('/etc/yum.repos.d/zeroc-ice-el6.repo') }
   end
 
-  # And the ugly way to load postgres
 else
   raise "Platform / family not supported: #{node['platform']} / #{node['platform_family']}"
 end
@@ -117,7 +117,11 @@ if enable_rpmfusion_free then
   end
 end
 
-node.normal['postgresql']['version'] = '9.3'
+# For any platforms that have an old version of postgresql ...
+if platform_family?('rhel') && node['platform_version'].to_f() < 7.0 then
+  node.normal['postgresql']['version'] = '9.3'
+  include_recipe 'postgresql::yum_pgdg_postgresql'
+end
 
 include_recipe 'postgresql::client'
 include_recipe 'postgresql::server'
