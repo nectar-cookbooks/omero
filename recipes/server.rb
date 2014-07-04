@@ -61,7 +61,7 @@ if platform_family?('debian') then
                    "zeroc#{ice}", 'postgresql', 'mencoder' ]
   pil_package = 'python-pil' if platform?('ubuntu') and 
                                 ( node['platform_version'] <=> '14.04') >= 0
-elsif platform_family?('fedora', 'redhat') then
+elsif platform_family?('fedora', 'rhel') then
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
                    'python-matplotlib', 'numpy', 'python-tables', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
@@ -101,7 +101,7 @@ else
     pil_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
                       'zlib1g-dev']
     pil = 'pil'
-  elsif platform_family?('redhat', 'fedora') then
+  elsif platform_family?('rhel', 'fedora') then
     pil_build_deps = ['python-devel', 'libjpeg-devel', 'libtiff-devel', 
                       'zlib-devel']
     pil = 'pillow'
