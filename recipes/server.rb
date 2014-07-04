@@ -87,7 +87,8 @@ elsif platform_family?('rhel') then
                         'zlib-devel']
            },
            { 'module' => 'numexpr',
-             'version' => '1.4.2'
+             'version' => '1.4.2',
+             'deps' => [],
            },
            { 'module' => 'tables',
              'version' => '2.4.0',
