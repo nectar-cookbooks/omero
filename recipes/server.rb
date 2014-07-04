@@ -69,7 +69,7 @@ elsif platform_family?('fedora', 'redhat') then
   enable_rpmfusion_free = true
   # pil_package = 'python-pillow'
 else
-  raise 'Platform not supported ...'
+  raise "Platform / family not supported: #{node['platform'] / #{node['platform_family']}"
 end
 
 if enable_rpmfusion_free then
