@@ -55,28 +55,47 @@ else
   url = "#{BASE_URL}/#{version}/artifacts/#{build}.zip"
 end
 
-tables_package = 'python_tables'
+pips = []
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
-                   'python-numpy', 'python-scipy',
+                   'python-numpy', 'python-scipy', 'python_tables',
                    "zeroc#{ice}", 'postgresql', 'mencoder' ]
-  pil_package = 'python-pil' if platform?('ubuntu') and 
-                                ( node['platform_version'] <=> '14.04') >= 0
+  
+  if platform?('ubuntu') and ( node['platform_version'] <=> '14.04') >= 0
+    dependencies << 'python-pil'
+  else
+    pips = [ { 'module' => 'pil',
+               'deps' => ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
+                          'zlib1g-dev']
+             } ]
+  end
+    
 elsif platform_family?('fedora') then
-  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
-                   'python-matplotlib', 'numpy', 'scipy',
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python_tables',
+                   'python-pillow', 'python-matplotlib', 'numpy', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
                    'postgresql-server', 'mencoder']
   enable_rpmfusion_free = true
-  pil_package = 'python-pillow'
 elsif platform_family?('rhel') then
   # Note that we are not installing any version of mencoder ...
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
                    'python-matplotlib', 'numpy', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
                    'postgresql-server']
+  pips = [ { 'module' => 'pillow',
+             'deps' => ['python-devel', 'libjpeg-devel', 'libtiff-devel', 
+                        'zlib-devel']
+           },
+           { 'module' => 'numexpr',
+             'version' => '1.4.2'
+           },
+           { 'module' => 'tables',
+             'version' => '2.4.0',
+             'deps' => ['gcc', 'Cython', 'hdf5-devel']
+           }
+         ]
   enable_rpmfusion_free = true
-  tables_package = nil
+  
   # Ugly way to add the ZeroC repo ...
   remote_file '/etc/yum.repos.d/zeroc-ice-el6.repo' do
     source 'http://download.zeroc.com/Ice/3.5/el6/zeroc-ice-el6.repo'
@@ -101,51 +120,22 @@ include_recipe 'postgresql::server'
 
 include_recipe 'java::default'
 
+# Regular packages from the package repositories
 dependencies.each() do |pkg| 
   package pkg
 end
 
-if pil_package then
-  package pil_package do
-  end
-else
-  # If we can't install 'pil' from the package manager, build from source.
+# Python packages that need to be 'pip' installed.
+if pips.length > 0
   include_recipe 'python::default'
-  if platform_family?('debian') then
-    pil_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
-                      'zlib1g-dev']
-    pil = 'pil'
-  elsif platform_family?('rhel', 'fedora') then
-    pil_build_deps = ['python-devel', 'libjpeg-devel', 'libtiff-devel', 
-                      'zlib-devel']
-    pil = 'pillow'
-  else
-    raise 'Platform not supported ...'
-  end
-  pil_build_deps.each() do |pkg|
-    package pkg do
+  pips.each() do |pip_data|
+    pip_data['deps'].each() do |pkg|
+      package pkg do
+      end
     end
-  end
-  python_pip pil do
-  end
-end
-
-if tables_package then
-  package tables_package do
-  end
-else
-  # If we can't install 'tables' from the package manager, build from source.
-  include_recipe 'python::default'
-  if platform_family?('rhel') then
-    tables_build_deps = ['gcc', 'Cython', 'hdf5-devel']
-  else
-    raise 'Platform not supported ...'
-  end
-  tables_build_deps.each() do |pkg|
-    package pkg do
+    python_pip pip_data['module'] do
+      version pip_data['version'] if pip_data['version']
     end
-  end
-  python_pip 'tables' do
   end
 end
 
