@@ -76,6 +76,11 @@ elsif platform_family?('rhel') then
                    'postgresql-server', 'mencoder']
   enable_rpmfusion_free = true
   tables_package = nil
+  yum_repository 'zeroc-ice' do
+    description 'ZeroC ICE repo'
+    baseurl 'http://www.zeroc.com/download/Ice/3.5/el6/zeroc-ice-el6.repo'
+    action :create
+  end
 else
   raise "Platform / family not supported: #{node['platform']} / #{node['platform_family']}"
 end
