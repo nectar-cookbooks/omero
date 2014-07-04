@@ -55,19 +55,27 @@ else
   url = "#{BASE_URL}/#{version}/artifacts/#{build}.zip"
 end
 
+tables_package = 'python_tables'
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
-                   'python-numpy', 'python-tables', 'python-scipy',
+                   'python-numpy', 'python-scipy',
                    "zeroc#{ice}", 'postgresql', 'mencoder' ]
   pil_package = 'python-pil' if platform?('ubuntu') and 
                                 ( node['platform_version'] <=> '14.04') >= 0
-elsif platform_family?('fedora', 'rhel') then
+elsif platform_family?('fedora') then
   dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
-                   'python-matplotlib', 'numpy', 'python-tables', 'scipy',
+                   'python-matplotlib', 'numpy', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 
                    'postgresql-server', 'mencoder']
   enable_rpmfusion_free = true
-  # pil_package = 'python-pillow'
+  pil_package = 'python-pillow'
+elsif platform_family?('rhel') then
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
+                   'python-matplotlib', 'numpy', 'scipy',
+                   'ice', 'ice-python', 'ice-servers', 
+                   'postgresql-server', 'mencoder']
+  enable_rpmfusion_free = true
+  tables_package = nil
 else
   raise "Platform / family not supported: #{node['platform']} / #{node['platform_family']}"
 end
@@ -113,6 +121,25 @@ else
     end
   end
   python_pip pil do
+  end
+end
+
+if tables_package then
+  package tables_package do
+  end
+else
+  # If we can't install 'tables' from the package manager, build from source.
+  include_recipe 'python::default'
+  if platform_family?('rhel') then
+    tables_build_deps = ['gcc', 'Cython', 'hdf5-devel']
+  else
+    raise 'Platform not supported ...'
+  end
+  tables_build_deps.each() do |pkg|
+    package pkg do
+    end
+  end
+  python_pip 'tables' do
   end
 end
 
