@@ -67,6 +67,9 @@ if web_frontend then
     ensite = 'nxensite'
     dissite = 'nxdissite'
     http = node['nginx']['dir']
+    if platform_family?('rhel') 
+      include_recipe 'nginx::repo'
+    end
   else 
     raise "Unsupported web frontend #{web_frontend}"
   end
