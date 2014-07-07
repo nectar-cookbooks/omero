@@ -83,6 +83,10 @@ if web_frontend then
                 > #{http}/sites-available/omero
         #{dissite} default
         #{ensite} omero
+        # Disable the "default" config on nginx if it exists
+        if [ -e #{http}/conf.d/default.conf ] ; then
+          mv #{http}/conf.d/default.conf #{http}/conf.d/default.conf.xxx
+        fi
       EOH
     end
   end
