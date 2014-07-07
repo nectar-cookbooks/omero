@@ -40,7 +40,7 @@ web_recipe = node['omero']['web']['recipe']
 
 # If the server might be running, stop and disable it.
 service 'omero-web stop' do
-  service-name 'omero-web'
+  service_name 'omero-web'
   pattern 'OMERO.server/var/django.pid'
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero-web') end
@@ -110,7 +110,7 @@ template '/etc/init.d/omero-web' do
 end
 
 service 'omero-web start' do
-  service-name 'omero-web'
+  service_name 'omero-web'
   pattern 'OMERO.server/var/django.pid'
   action enabled ? [ :enable, :start ] : [ :disabled ]
 end
