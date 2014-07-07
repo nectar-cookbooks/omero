@@ -110,9 +110,23 @@ template '/etc/init.d/omero-web' do
   })            
 end
 
-service 'omero-web start' do
-  service_name 'omero-web'
-  pattern 'OMERO.server/var/django.pid'
-  provider Chef::Provider::Service::Init
-  action enabled ? [ :enable, :start ] : [ :disabled ]
+if enabled then
+  service 'omero-web start' do
+    service_name 'omero-web'
+    pattern 'OMERO.server/var/django.pid'
+    provider Chef::Provider::Service::Init
+    action :start
+  end
+  
+  service 'omero-web enable' do
+    service_name 'omero-web'
+    pattern 'OMERO.server/var/django.pid'
+    action :enable
+  end
+else 
+  service 'omero-web disable' do
+    service_name 'omero-web'
+    pattern 'OMERO.server/var/django.pid'
+    action :disable
+  end
 end

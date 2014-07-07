@@ -260,5 +260,11 @@ service 'omero start' do
   service_name 'omero'
   pattern 'icegridnode'
   provider Chef::Provider::Service::Init
-  action [ :enable, :start ]
+  action [ :start ]
+end
+
+service 'omero enable' do
+  service_name 'omero'
+  pattern 'icegridnode'
+  action [ :enable ]
 end
