@@ -171,12 +171,14 @@ end
 service 'omero-web stop' do
   pattern 'OMERO.server/var/django.pid'
   service_name 'omero-web'
+  provider Chef::Provider::Service::Init
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero-web') end
 end
 service 'omero stop' do
   service_name 'omero'
   pattern 'icegridnode'
+  provider Chef::Provider::Service::Init
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero') end
 end
@@ -257,5 +259,6 @@ end
 service 'omero start' do
   service_name 'omero'
   pattern 'icegridnode'
+  provider Chef::Provider::Service::Init
   action [ :enable, :start ]
 end

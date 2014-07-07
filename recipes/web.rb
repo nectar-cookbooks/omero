@@ -43,6 +43,7 @@ service 'omero-web stop' do
   service_name 'omero-web'
   pattern 'OMERO.server/var/django.pid'
   action [ :stop ] 
+  provider Chef::Provider::Service::Init
   only_if do ::File.exists?('/etc/init.d/omero-web') end
 end
 
@@ -112,5 +113,6 @@ end
 service 'omero-web start' do
   service_name 'omero-web'
   pattern 'OMERO.server/var/django.pid'
+  provider Chef::Provider::Service::Init
   action enabled ? [ :enable, :start ] : [ :disabled ]
 end
