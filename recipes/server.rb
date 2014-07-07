@@ -255,7 +255,7 @@ template '/etc/init.d/omero' do
 end
 
 service 'omero start' do
-  service-name 'omero'
+  service_name 'omero'
   pattern 'icegridnode'
   action [ :enable, :start ]
 end
