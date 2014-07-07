@@ -39,9 +39,11 @@ web_configure = node['omero']['web']['configure']
 web_recipe = node['omero']['web']['recipe']
 
 # If the server might be running, stop and disable it.
-service 'omero-web' do
+service 'omero-web stop' do
+  service_name 'omero-web'
   pattern 'OMERO.server/var/django.pid'
   action [ :stop ] 
+  provider Chef::Provider::Service::Init
   only_if do ::File.exists?('/etc/init.d/omero-web') end
 end
 
@@ -67,6 +69,9 @@ if web_frontend then
     ensite = 'nxensite'
     dissite = 'nxdissite'
     http = node['nginx']['dir']
+    if platform_family?('rhel') 
+      include_recipe 'nginx::repo'
+    end
   else 
     raise "Unsupported web frontend #{web_frontend}"
   end
@@ -80,6 +85,10 @@ if web_frontend then
                 > #{http}/sites-available/omero
         #{dissite} default
         #{ensite} omero
+        # Disable the "default" config on nginx if it exists
+        if [ -e #{http}/conf.d/default.conf ] ; then
+          mv #{http}/conf.d/default.conf #{http}/conf.d/default.conf.xxx
+        fi
       EOH
     end
   end
@@ -101,7 +110,23 @@ template '/etc/init.d/omero-web' do
   })            
 end
 
-service 'omero-web' do
-  pattern 'OMERO.server/var/django.pid'
-  action enabled ? [ :enable, :start ] : [ :disabled ]
+if enabled then
+  service 'omero-web start' do
+    service_name 'omero-web'
+    pattern 'OMERO.server/var/django.pid'
+    provider Chef::Provider::Service::Init
+    action :start
+  end
+  
+  service 'omero-web enable' do
+    service_name 'omero-web'
+    pattern 'OMERO.server/var/django.pid'
+    action :enable
+  end
+else 
+  service 'omero-web disable' do
+    service_name 'omero-web'
+    pattern 'OMERO.server/var/django.pid'
+    action :disable
+  end
 end

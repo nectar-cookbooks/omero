@@ -1,5 +1,5 @@
 node.default['omero']['release'] = 
-  "http://downloads.openmicroscopy.org/omero/5.0.1/artifacts/OMERO.server-5.0.1-ice35-b21.zip"
+  "http://downloads.openmicroscopy.org/omero/5.0.2/artifacts/OMERO.server-5.0.2-ice35-b26.zip"
 node.default['omero']['install'] = '/opt/omero'
 node.default['omero']['user'] = 'omero'
 node.default['omero']['var'] = '/var/omero'

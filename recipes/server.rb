@@ -55,21 +55,56 @@ else
   url = "#{BASE_URL}/#{version}/artifacts/#{build}.zip"
 end
 
+pips = []
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
-                   'python-numpy', 'python-tables', 'python-scipy',
-                   "zeroc#{ice}", 'postgresql', 'mencoder' ]
-  pil_package = 'python-pil' if platform?('ubuntu') and 
-                                ( node['platform_version'] <=> '14.04') >= 0
+                   'python-numpy', 'python-scipy', 'python_tables',
+                   "zeroc#{ice}", 'mencoder', 'postgresql' ]
+  
+  if platform?('ubuntu') && ( node['platform_version'] <=> '14.04') >= 0
+    dependencies << 'python-pil'
+  else
+    pips = [ { 'module' => 'pil',
+               'deps' => [ 'python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
+                           'zlib1g-dev' ]
+             } ]
+  end
+    
 elsif platform_family?('fedora') then
-  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
-                   'python-matplotlib', 'numpy', 'python-tables', 'scipy',
-                   'ice', 'ice-python', 'ice-servers', 
-                   'postgresql-server', 'mencoder']
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python_tables',
+                   'python-pillow', 'python-matplotlib', 'numpy', 'scipy',
+                   'ice', 'ice-python', 'ice-servers', 'mencoder', 
+                   'postgresql-server' ]
   enable_rpmfusion_free = true
-  # pil_package = 'python-pillow'
+
+elsif platform_family?('rhel') then
+  # Note that we are not installing any version of mencoder ...
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 
+                   'python-matplotlib', 'numpy', 'scipy',
+                   'ice', 'ice-python', 'ice-servers' ]
+  pips = [ { 'module' => 'pillow',
+             'deps' => [ 'python-devel', 'libjpeg-devel', 'libtiff-devel', 
+                         'zlib-devel' ]
+           },
+           { 'module' => 'numexpr',
+             'version' => '1.4.2',
+             'deps' => [],
+           },
+           { 'module' => 'tables',
+             'version' => '2.4.0',
+             'deps' => [ 'gcc', 'Cython', 'hdf5-devel' ]
+           }
+         ]
+  enable_rpmfusion_free = true
+  
+  # Ugly way to add the ZeroC repo ...
+  remote_file '/etc/yum.repos.d/zeroc-ice-el6.repo' do
+    source 'http://download.zeroc.com/Ice/3.5/el6/zeroc-ice-el6.repo'
+    not_if { ::File.exists?('/etc/yum.repos.d/zeroc-ice-el6.repo') }
+  end
+
 else
-  raise 'Platform not supported ...'
+  raise "Platform / family not supported: #{node['platform']} / #{node['platform_family']}"
 end
 
 if enable_rpmfusion_free then
@@ -82,37 +117,36 @@ if enable_rpmfusion_free then
   end
 end
 
+# For any platforms that have an old version of postgresql ...
+if platform_family?('rhel') && node['platform_version'].to_f() < 7.0 then
+  node.normal['postgresql']['version'] = '9.3'
+  node.normal['postgresql']['enable_pgdg_yum'] = true
+  node.normal['postgresql']['client']['packages'] = ["postgresql93"]
+  node.normal['postgresql']['server']['packages'] = ["postgresql93-server"]
+  node.normal['postgresql']['server']['service_name'] = "postgresql-9.3"
+end
+
 include_recipe 'postgresql::client'
 include_recipe 'postgresql::server'
 
 include_recipe 'java::default'
 
+# Regular packages from the package repositories
 dependencies.each() do |pkg| 
   package pkg
 end
 
-if pil_package then
-  package pil_package do
-  end
-else
-  # If we can't install 'pil' from the package manager, build from source.
+# Python packages that need to be 'pip' installed.
+if pips.length > 0
   include_recipe 'python::default'
-  if platform_family?('debian') then
-    pil_build_deps = ['python-dev', 'libjpeg-dev', 'libfreetype6-dev', 
-                      'zlib1g-dev']
-    pil = 'pil'
-  elsif platform_family?('rhel', 'fedora') then
-    pil_build_deps = ['python-devel', 'libjpeg-devel', 'libtiff-devel', 
-                      'zlib-devel']
-    pil = 'pillow'
-  else
-    raise 'Platform not supported ...'
-  end
-  pil_build_deps.each() do |pkg|
-    package pkg do
+  pips.each() do |pip_data|
+    pip_data['deps'].each() do |pkg|
+      package pkg do
+      end
     end
-  end
-  python_pip pil do
+    python_pip pip_data['module'] do
+      version pip_data['version'] if pip_data['version']
+    end
   end
 end
 
@@ -134,15 +168,17 @@ remote_file "#{omero_install}/#{build}.zip" do
 end
 
 # Shut down Omero / Omero.web while we fiddle with things ...
-service 'omero-web-stop' do
+service 'omero-web stop' do
   pattern 'OMERO.server/var/django.pid'
   service_name 'omero-web'
+  provider Chef::Provider::Service::Init
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero-web') end
 end
-service 'omero-stop' do
+service 'omero stop' do
   service_name 'omero'
   pattern 'icegridnode'
+  provider Chef::Provider::Service::Init
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero') end
 end
@@ -220,7 +256,15 @@ template '/etc/init.d/omero' do
   })            
 end
 
-service 'omero' do
+service 'omero start' do
+  service_name 'omero'
   pattern 'icegridnode'
-  action [ :enable, :start ]
+  provider Chef::Provider::Service::Init
+  action [ :start ]
+end
+
+service 'omero enable' do
+  service_name 'omero'
+  pattern 'icegridnode'
+  action [ :enable ]
 end
