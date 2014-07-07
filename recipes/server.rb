@@ -168,13 +168,13 @@ remote_file "#{omero_install}/#{build}.zip" do
 end
 
 # Shut down Omero / Omero.web while we fiddle with things ...
-service 'omero-web-stop' do
+service 'omero-web stop' do
   pattern 'OMERO.server/var/django.pid'
   service_name 'omero-web'
   action [ :stop ] 
   only_if do ::File.exists?('/etc/init.d/omero-web') end
 end
-service 'omero-stop' do
+service 'omero stop' do
   service_name 'omero'
   pattern 'icegridnode'
   action [ :stop ] 
@@ -254,7 +254,8 @@ template '/etc/init.d/omero' do
   })            
 end
 
-service 'omero' do
+service 'omero start' do
+  service-name 'omero'
   pattern 'icegridnode'
   action [ :enable, :start ]
 end
