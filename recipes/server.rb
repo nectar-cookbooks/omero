@@ -58,7 +58,7 @@ end
 pips = []
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
-                   'python-numpy', 'python-scipy', 'python_tables',
+                   'python-numpy', 'python-scipy', 'python-tables',
                    "zeroc#{ice}", 'mencoder', 'postgresql' ]
   
   if platform?('ubuntu') && ( node['platform_version'] <=> '14.04') >= 0
@@ -71,7 +71,7 @@ if platform_family?('debian') then
   end
     
 elsif platform_family?('fedora') then
-  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python_tables',
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python-tables',
                    'python-pillow', 'python-matplotlib', 'numpy', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 'mencoder', 
                    'postgresql-server' ]
@@ -239,6 +239,20 @@ bash 'init-omero-db' do
   psql -h localhost -U #{db_user} #{db_name} < OMERO5.0__0.sql
   EOH
   not_if do ::File.exists?("#{omero_install}/OMERO.server/OMERO5.0__0.sql") end
+end
+
+if ldap then
+  bash 'omero-configuration-ldap' do
+    cwd "#{omero_install}/OMERO.server"
+    user omero_user
+    code <<-EOH
+    bin/omero config set omero.ldap.config true
+    bin/omero config set omero.ldap.urls ldaps://ldap.uq.edu.au
+    bin/omero config set omero.ldap.
+    bin/omero config set omero.data.dir #{omero_var}/data
+    bin/omero config set Ice.Default.Host #{node['ipaddress']}
+    EOH
+  end
 end
 
 if platform_family?('debian') then
