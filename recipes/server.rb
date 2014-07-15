@@ -58,7 +58,7 @@ end
 pips = []
 if platform_family?('debian') then
   dependencies = [ 'zip', 'python2.7', 'python-matplotlib',
-                   'python-numpy', 'python-scipy', 'python_tables',
+                   'python-numpy', 'python-scipy', 'python-tables',
                    "zeroc#{ice}", 'mencoder', 'postgresql' ]
   
   if platform?('ubuntu') && ( node['platform_version'] <=> '14.04') >= 0
@@ -71,7 +71,7 @@ if platform_family?('debian') then
   end
     
 elsif platform_family?('fedora') then
-  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python_tables',
+  dependencies = [ 'zip', 'unzip', 'python', 'python-devel', 'python-tables',
                    'python-pillow', 'python-matplotlib', 'numpy', 'scipy',
                    'ice', 'ice-python', 'ice-servers', 'mencoder', 
                    'postgresql-server' ]
